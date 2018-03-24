@@ -11,4 +11,4 @@ Add a bunch of docs to `document_files` in `main.py`, e.g. `document_files = ['.
 
 ### Output
 
-The scripts writes a plain-text document index to `merged.index`.
+The script writes a plain-text document index to `merged.index`.
