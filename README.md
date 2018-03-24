@@ -1,14 +1,14 @@
-** Install Depdendencies **
+### Install Dependencies
 
 `pip install -r requirements.txt`
 
-** Configure **
+###  Configure
 Add a bunch of docs to `document_files` in `main.py`, e.g. `document_files = ['./data/TREC8all/Adhoc/latimes/la010189']`
 
-** Run **
+### Run
 
 `python main.py`
 
-** Output **
+### Output
 
 The scripts writes a plain-text document index to `merged.index`.
