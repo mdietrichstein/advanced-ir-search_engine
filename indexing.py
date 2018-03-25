@@ -1,6 +1,5 @@
 from collections import defaultdict, namedtuple
 import tempfile
-from tqdm import tqdm
 
 from tokenization import generate_tokens_for_files
 
@@ -24,16 +23,12 @@ def create_index_simple(document_files, preprocess, output_filepath,
 
     # sort by term
     token_list.sort(key=lambda token: token[1])
-    num_tokens = len(token_list)
-
-    if verbose:
-        print('Processing {} tokens'.format(num_tokens))
 
     current_term = None
     document_ids = []
 
     with open(output_filepath, 'w') as output_file:
-        for (doc_id, term) in tqdm(token_list, total=num_tokens):
+        for (doc_id, term) in token_list:
             if term != current_term:
                 # we have encountered a new term
                 if document_ids:
@@ -77,9 +72,9 @@ def create_index_spmi(document_files, preprocess, output_filepath,
 
 
     if verbose:
-        print('Merging {} blocks'.format(len(block_filenames)))
+        print('Merging {} block(s)'.format(len(block_filenames)))
 
-    __merge_blocks(block_filenames, output_filepath)
+    __merge_spmi_blocks(block_filenames, output_filepath)
 
 
 def __spmi_invert(token_stream, max_tokens_per_block):
@@ -114,7 +109,7 @@ def __spmi_invert(token_stream, max_tokens_per_block):
     return (filename, is_exhausted)
 
 
-def __merge_blocks(block_filepaths, output_filepath):
+def __merge_spmi_blocks(block_filepaths, output_filepath):
     block_files = list(map(lambda filepath: open(filepath, 'r'), block_filepaths))
 
     head_entries = list(map(lambda file: __read_token(file), block_files))
