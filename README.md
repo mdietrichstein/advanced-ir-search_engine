@@ -14,7 +14,7 @@ Add a bunch of docs to `document_files` in `cmd_index.py`, e.g. `document_files 
 The script creates two files:
 
 * `simple.index`: Index created via a simple postings list method
-* `spmi.index`: Index created by using the SPMI method
+* `spimi.index`: Index created by using the SPIMI method
 
 Both files should be identical.
 
