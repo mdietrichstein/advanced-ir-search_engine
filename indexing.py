@@ -1,4 +1,5 @@
-from collections import defaultdict, namedtuple
+from collections import defaultdict, namedtuple, Counter
+
 import tempfile
 
 from tokenization import generate_tokens_for_files
@@ -236,5 +237,4 @@ def __write_index_entry(file, term, postings_list):
 
 
 def __to_bag_of_words(words):
-    unique_words = set(words)
-    return list(map(lambda word: (word, words.count(word)), unique_words))
+    return Counter(words).items()
