@@ -1,5 +1,5 @@
 # Custom
-merged.index
+*.index
 data/
 logs/
 *.csv

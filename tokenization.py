@@ -11,12 +11,14 @@ TEXT_PATTERN = re.compile(r'<TEXT>(.*?)<\/TEXT>', re.DOTALL | re.M)
 
 
 def generate_tokens_for_files(filepaths, encoding='latin-1',
-                              use_regex_parser=True):
+                              use_regex_parser=True,
+                              strip_html_tags=True,
+                              strip_html_entities=True,
+                              strip_square_bracket_tags=True,
+                              preprocess=create_preprocessor()):
     """Generator which provides a list of (doc_id, term) pairs for documents
     contained in the given files
     """
-    preprocess = create_preprocessor()
-
     for filepath in tqdm(filepaths, total=len(filepaths)):
         documents = None
 
@@ -28,11 +30,14 @@ def generate_tokens_for_files(filepaths, encoding='latin-1',
         for document in documents:
             (doc_id, content) = document
 
-            words = split_words(content)
-            terms = preprocess(words)
-            terms = set(terms)  # make unique
+            words = split_words(content,
+                                strip_html_tags=strip_html_tags,
+                                strip_html_entities=strip_html_entities,
+                                strip_square_bracket_tags=strip_square_bracket_tags)
 
-            for term in set(terms):
+            terms = preprocess(words)
+
+            for term in terms:
                 yield (doc_id, term)
 
 
