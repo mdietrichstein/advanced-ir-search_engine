@@ -4,11 +4,11 @@ from indexing import create_index_simple, create_index_spmi
 import os
 
 if __name__ == "__main__":
-    base_folder = './data/TREC8all/Adhoc/latimes/'
-    document_files = list(map(lambda filename: base_folder + '/' + filename,
-                          os.listdir(base_folder)))
+    # base_folder = './data/TREC8all/Adhoc/latimes/'
+    # document_files = list(map(lambda filename: base_folder + '/' + filename,
+    #                       os.listdir(base_folder)))
 
-    # document_files = ['./data/TREC8all/Adhoc/latimes/la010289']
+    document_files = ['./data/TREC8all/Adhoc/latimes/la010289']
     
     print()
     print('Processing {} file(s)'.format(len(document_files)))
