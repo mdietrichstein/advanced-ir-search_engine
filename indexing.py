@@ -19,10 +19,22 @@ def create_index_simple(document_files, preprocess, output_filepath,
                                              strip_square_bracket_tags=strip_square_bracket_tags,
                                              preprocess=preprocess)
 
+    if verbose:
+        print('Reading all tokens')
+
     token_list = list(token_stream)
 
+    if verbose:
+        print('Read {} tokens'.format(len(token_list)))
+
     # sort by term
+    if verbose:
+        print('Sorting list')
+
     token_list.sort(key=lambda token: token[1])
+
+    if verbose:
+        print('Done')
 
     current_term = None
     document_ids = []
@@ -40,10 +52,16 @@ def create_index_simple(document_files, preprocess, output_filepath,
 
             document_ids.append(doc_id)
 
+        if verbose:
+            print('Done writing index entry')
+
         # write last entry
         if document_ids:
             __write_index_entry(output_file, current_term,
                                 __to_bag_of_words(document_ids))
+
+        if verbose:
+            print('Wrote last entry')
 
 
 def create_index_spmi(document_files, preprocess, output_filepath,
@@ -211,12 +229,10 @@ def __write_index_entry(file, term, postings_list):
     """
     postings = list(map(lambda e: '{}|{}'.format(e[0], e[1]), postings_list))
 
-    file.write(term)
-    file.write('\t')
-    file.write(str(len(postings_list)))
-    file.write('\t')
-    file.write(','.join(postings))
-    file.write('\n')
+    line = '{}\t{}\t{}\n'.format(
+        term, str(len(postings_list)), ','.join(postings))
+
+    file.write(line)
 
 
 def __to_bag_of_words(words):
