@@ -19,6 +19,8 @@ def generate_tokens_for_files(filepaths, encoding='latin-1',
     """Generator which provides a list of (doc_id, term) pairs for documents
     contained in the given files
     """
+
+    num_documents_processed = 0
     for filepath in tqdm(filepaths, total=len(filepaths)):
         documents = None
 
@@ -28,6 +30,8 @@ def generate_tokens_for_files(filepaths, encoding='latin-1',
             documents = __xml_parse_documents_from_file(filepath)
 
         for document in documents:
+            num_documents_processed += 1
+
             (doc_id, content) = document
 
             words = split_words(content,
@@ -38,7 +42,7 @@ def generate_tokens_for_files(filepaths, encoding='latin-1',
             terms = preprocess(words)
 
             for term in terms:
-                yield (doc_id, term)
+                yield (doc_id, term, num_documents_processed)
 
 
 def __regex_parse_documents_from_file(file_path, encoding='latin-1'):

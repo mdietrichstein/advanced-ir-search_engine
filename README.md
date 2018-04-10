@@ -20,7 +20,11 @@ Both files should be identical.
 
 ### Index Format
 
-The index file format is text-based where each line represents a term including related data:
+The index file format is text-based.
+
+The first line states the number of unique documents in the index.
+
+Each consecutive line represents a term including related data:
 
 `<TERM> <DOCUMENT_FREQUENCY> <POSTINGS>`
 
