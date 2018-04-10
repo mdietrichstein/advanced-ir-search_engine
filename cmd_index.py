@@ -19,8 +19,8 @@ if __name__ == "__main__":
 
     preprocessor = create_preprocessor(enable_case_folding=True,
                                        enable_remove_stop_words=True,
-                                       enable_stemmer=False,
-                                       enable_lemmatizer=True,
+                                       enable_stemmer=True,
+                                       enable_lemmatizer=False,
                                        min_length=2)
 
     print('Writing index using simple method to "simple.index"')
