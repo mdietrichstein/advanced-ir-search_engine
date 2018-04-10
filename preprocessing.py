@@ -1,7 +1,9 @@
 import re
 import Stemmer
+from nltk.stem import WordNetLemmatizer
 
 STEMMER = Stemmer.Stemmer('english')
+LEMMATIZER = WordNetLemmatizer()
 HTML_TAG_PATTERN = re.compile(r'<.*?>')
 HTML_ENTITY_PATTERN = re.compile('&[a-zA-Z][-.a-zA-Z0-9]*[^a-zA-Z0-9]')
 SQUARE_BRACKET_TAG_PATTERN = re.compile(r'\[.*?\]')
@@ -36,6 +38,7 @@ def split_words(text,
 def create_preprocessor(enable_case_folding=True,
                         enable_remove_stop_words=True,
                         enable_stemmer=True,
+                        enable_lemmatizer=False,
                         min_length=2):
 
     """Generates a preprocessing function configured to apply the specified
@@ -51,6 +54,9 @@ def create_preprocessor(enable_case_folding=True,
 
     if enable_stemmer:
         steps.append(__stem)
+
+    if enable_lemmatizer:
+        steps.append(__lemmatize)
 
     if min_length:
         steps.append(lambda words: __remove_short_words(words, min_length))
@@ -74,6 +80,10 @@ def __remove_stop_words(words):
 
 def __stem(words):
     return map(lambda word: STEMMER.stemWord(word), words)
+
+
+def __lemmatize(words):
+    return map(lambda word: LEMMATIZER.lemmatize(word), words)
 
 
 def __remove_short_words(words, min_length):
