@@ -5,7 +5,7 @@ import tempfile
 from tokenization import generate_tokens_for_files
 
 
-Token = namedtuple('Token', ['term', 'document_frequency', 'postings'])
+Token = namedtuple('Token', ['position','term', 'document_frequency', 'postings'])
 
 
 def create_index_simple(document_files, preprocess, output_filepath,
@@ -168,16 +168,19 @@ def create_index_reader(filepath):
     number_of_documents = int(f.readline())
 
     def generator():
+        position = 0
         with f:
-            token = __read_token(f)
+            token = __read_token(f, position)
 
             while token:
                 yield token
-                token = __read_token(f)
+                position += 1
+                token = __read_token(f, position)
 
     return (number_of_documents, generator)
 
-def __read_token(file):
+
+def __read_token(file, position=None):
     line = file.readline()
 
     if not line:
@@ -196,7 +199,7 @@ def __read_token(file):
 
     postings = list(map(to_tuple, postings_entries))
 
-    return Token(term, document_frequency, postings)
+    return Token(position, term, document_frequency, postings)
 
 
 def __write_spimi_block(dictionary):
