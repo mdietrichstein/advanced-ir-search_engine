@@ -1,6 +1,6 @@
 from preprocessing import create_preprocessor, split_words
 from indexing import create_index_reader
-from searching import simple_tfidf_search
+from searching import simple_tfidf_search, vecspace_tfidf_search
 
 index_filepath = 'simple.index'
 
@@ -29,6 +29,10 @@ print('reading index')
 index = list(index_reader)
 number_of_terms = len(index)
 print('done')
+
+# document_scores = vecspace_tfidf_search(number_of_documents, index, search_terms)
+# for i in range(20):
+#   print(document_scores[i], '\n')
 
 document_scores = simple_tfidf_search(number_of_documents, index, search_terms)
 

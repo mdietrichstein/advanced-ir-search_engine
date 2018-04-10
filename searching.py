@@ -4,6 +4,45 @@ from collections import namedtuple
 
 Document = namedtuple('Document', ['id', 'terms'])
 
+
+def vecspace_tfidf_search(number_of_documents, index, search_terms):
+  search_terms = list(set(search_terms))
+  (documents, search_tokens) = __find_documents_for_terms(index, search_terms)
+  document_scores = []
+
+  document_list = documents.values()
+
+  number_of_search_terms = len(search_terms)
+
+  document_vectors = np.zeros((number_of_documents, number_of_search_terms))
+
+  for di, document in enumerate(document_list):
+    document_vector = document_vectors[di]
+
+    for ti, search_token in enumerate(search_tokens):
+
+      if search_token.term in document.terms:
+        term_frequency = document.terms[search_token.term]
+
+      document_vector[ti] = \
+        __tfidf_score(number_of_documents,
+                      search_token.document_frequency,
+                      term_frequency)
+
+      norm = np.linalg.norm(document_vector)
+      document_vectors[di] = document_vector / norm
+
+  query_vector = np.zeros((number_of_search_terms, 1))
+
+  for ti, search_token in enumerate(search_tokens):
+    query_vector[ti] = math.log(number_of_documents / search_token.document_frequency)
+
+
+  scores = np.dot(document_vectors, query_vector)
+
+  idx = (-scores).argsort()[:50]
+  return np.array(document_list)[idx]
+
 def simple_tfidf_search(number_of_documents, index, search_terms):
   """Runs a simple tf-idf search thourgh the index
   """
