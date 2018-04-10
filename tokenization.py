@@ -1,7 +1,7 @@
 import re
+import codecs
 from tqdm import tqdm
 from xml.dom import minidom
-from pathlib import Path
 
 from preprocessing import split_words, create_preprocessor
 
@@ -51,7 +51,9 @@ def __regex_parse_documents_from_file(file_path, encoding='latin-1'):
     """
 
     # read whole file
-    content = Path(file_path, encoding=encoding).read_text()
+    content = None
+    with codecs.open(file_path, 'r', encoding=encoding) as file:
+        content = file.read()
 
     documents = []
 
@@ -74,7 +76,9 @@ def __xml_parse_documents_from_file(file_path, encoding='latin-1'):
     """
 
     # read whole file
-    content = Path(file_path, encoding=encoding).read_text()
+    content = None
+    with codecs.open(file_path, 'r', encoding=encoding) as file:
+        content = file.read()
 
     # split individual root level components to allow xml parsing
     doc_strings = content.split('</DOC>')
