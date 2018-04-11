@@ -70,7 +70,7 @@ def simple_tfidf_search(number_of_documents, index, search_terms):
             score += __tfidf_score(number_of_documents, document_frequency,
                                    term_frequency)
 
-        document_scores.append([document, score])
+        document_scores.append([document.id, score])
 
     document_scores.sort(key=lambda ds: ds[1], reverse=True)
 
@@ -116,7 +116,7 @@ def simple_bm25_search(number_of_documents, index, search_terms,
 
             score += bm25
 
-        document_scores.append([document, score])
+        document_scores.append([document.id, score])
 
     document_scores.sort(key=lambda ds: ds[1], reverse=True)
 
