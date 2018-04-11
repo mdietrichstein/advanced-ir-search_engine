@@ -45,6 +45,8 @@ Document = namedtuple('Document', ['id', 'terms'])
 
 def simple_tfidf_search(number_of_documents, index, search_terms):
     """Runs a simple tf-idf search through the index
+
+    Optimization: Pre-calculate tf-idf score and store it in index
     """
     search_terms = list(set(search_terms))
 
@@ -75,7 +77,8 @@ def simple_tfidf_search(number_of_documents, index, search_terms):
     return document_scores
 
 
-def simple_bm25_search(number_of_documents, index, search_terms):
+def simple_bm25_search(number_of_documents, index, search_terms,
+                       k1=1.2, b=0.75, k3=100):
     """Runs a simple bm25 search through the index
     """
     (documents, tokens) = __find_documents_for_terms(index, search_terms)
@@ -83,15 +86,13 @@ def simple_bm25_search(number_of_documents, index, search_terms):
 
     document_list = documents.values()
 
+    # Optimization: Save average_document_length in index
     average_document_length = __calculate_average_document_length(document_list)
-
-    k1 = 1.2
-    b = 0.75
-    k3 = 100
 
     search_term_counter = Counter(search_terms)
 
     for document in document_list:
+        # Optimization: Save document length in index
         document_length = __document_length(document) / average_document_length
 
         score = 0
@@ -100,15 +101,18 @@ def simple_bm25_search(number_of_documents, index, search_terms):
             term_frequency = 0
 
             if token.term in document.terms:
-              term_frequency = document.terms[token.term]
+                term_frequency = document.terms[token.term]
 
             tfq = search_term_counter[token.term]
             tfd = term_frequency
             dft = token.document_frequency
 
-            Bd = (1 - b) +( b * (document_length / average_document_length) )
+            length_ratio = (document_length / average_document_length)
+            K = k1 * ((1 - b) + (b * length_ratio))
 
-            bm25 =  (tfq / (k3 + tfq)) * (tfd / (Bd + tfd)) * math.log( (number_of_documents - dft + 0.5) / (dft - 0.5) )
+            bm25 = ((k3+1)*tfq)/(k3+1)
+            bm25 *= (((k1+1)*tfd)/(K+tfd))
+            bm25 *= math.log((number_of_documents-dft+0.5)/(dft+0.5))
 
             score += bm25
 
@@ -132,7 +136,7 @@ def __document_length(document):
     length = 0
 
     for (term, count) in document.terms.items():
-        length += len(term) * count
+        length += count
 
     return length
 
@@ -165,15 +169,15 @@ def __find_documents_for_terms(index, search_terms):
 
     # create document -> term mapping
     for search_token in search_tokens:
-      for posting in search_token.postings:
+        for posting in search_token.postings:
 
-        document_id = posting[0]
-        term_frequency = posting[1]
+            document_id = posting[0]
+            term_frequency = posting[1]
 
-        if not document_id in documents:
-            documents[document_id] = Document(document_id, {})
+            if not document_id in documents:
+                documents[document_id] = Document(document_id, {})
 
-        document = documents[document_id]
-        document.terms[search_token.term] = term_frequency
+            document = documents[document_id]
+            document.terms[search_token.term] = term_frequency
 
     return (documents, search_tokens)
