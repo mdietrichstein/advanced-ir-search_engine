@@ -5,7 +5,7 @@ import tempfile
 from tokenization import generate_tokens_for_files
 
 
-Token = namedtuple('Token', ['position','term', 'document_frequency', 'postings'])
+Token = namedtuple('Token', ['position', 'term', 'document_frequency', 'postings'])
 
 
 def create_index_simple(document_files, preprocess, output_filepath,

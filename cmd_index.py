@@ -23,7 +23,7 @@ if __name__ == "__main__":
                                        enable_lemmatizer=False,
                                        min_length=2)
 
-    print('Writing index using simple method to "simple.index"')
+    # print('Writing index using simple method to "simple.index"')
     # print('Reading source files')
     # create_index_simple(document_files, preprocessor, 'simple.index')
     # print()
