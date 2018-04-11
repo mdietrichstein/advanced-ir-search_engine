@@ -1,6 +1,7 @@
-from collections import defaultdict, namedtuple, Counter
-
+import json
 import tempfile
+import gc
+from collections import defaultdict, namedtuple, Counter
 
 from tokenization import generate_tokens_for_files
 
@@ -9,6 +10,7 @@ Token = namedtuple('Token', ['position', 'term', 'document_frequency', 'postings
 
 
 def create_index_simple(document_files, preprocess, output_filepath,
+                        document_stats_path,
                         verbose=True,
                         strip_html_tags=True,
                         strip_html_entities=True,
@@ -19,6 +21,9 @@ def create_index_simple(document_files, preprocess, output_filepath,
                                              strip_html_entities=strip_html_entities,
                                              strip_square_bracket_tags=strip_square_bracket_tags,
                                              preprocess=preprocess)
+
+    document_terms_counter = Counter()
+    document_length_counter = Counter()
 
     token_list = list(token_stream)
     num_documents_processed = token_list[-1][-1]
@@ -32,26 +37,38 @@ def create_index_simple(document_files, preprocess, output_filepath,
     with open(output_filepath, 'w') as output_file:
         output_file.write('{}\n'.format(num_documents_processed))
 
-        for (doc_id, term, _) in token_list:
+        for i, (doc_id, term, _) in enumerate(token_list):
             if term != current_term:
                 # we have encountered a new term. write current term to file
                 # and reset state
                 if document_ids:
-                    __write_index_entry(output_file, current_term,
-                                        __to_bag_of_words(document_ids))
+                    __flush_index_entry(output_file, current_term,
+                                        __to_bag_of_words(document_ids),
+                                        document_terms_counter,
+                                        document_length_counter)
 
                 current_term = term
                 document_ids = []
 
             document_ids.append(doc_id)
 
+            if i % 50000 == 0:
+                gc.collect()
+
         # write last entry
         if document_ids:
-            __write_index_entry(output_file, current_term,
-                                __to_bag_of_words(document_ids))
+            __flush_index_entry(output_file, current_term,
+                                __to_bag_of_words(document_ids),
+                                document_terms_counter,
+                                document_length_counter)
+
+    __write_document_stats(document_stats_path,
+                           document_terms_counter,
+                           document_length_counter)
 
 
 def create_index_spimi(document_files, preprocess, output_filepath,
+                       document_stats_path,
                        verbose=True,
                        max_tokens_per_block=10000000,
                        strip_html_tags=True,
@@ -82,7 +99,7 @@ def create_index_spimi(document_files, preprocess, output_filepath,
 
     with open(output_filepath, 'w') as output_file:
         output_file.write('{}\n'.format(num_documents_processed))
-        __merge_spimi_blocks(output_file, block_filenames)
+        __merge_spimi_blocks(output_file, document_stats_path, block_filenames)
 
 
 def __spimi_invert(token_stream, max_tokens_per_block):
@@ -117,7 +134,7 @@ def __spimi_invert(token_stream, max_tokens_per_block):
     return (filename, is_exhausted, num_documents_processed)
 
 
-def __merge_spimi_blocks(output_file, block_filepaths):
+def __merge_spimi_blocks(output_file, document_stats_path, block_filepaths):
     block_files = list(map(lambda filepath: open(filepath, 'r'), block_filepaths))
 
     head_entries = list(map(lambda file: __read_token(file), block_files))
@@ -125,6 +142,9 @@ def __merge_spimi_blocks(output_file, block_filepaths):
 
     num_files = len(block_filepaths)
     num_closed = 0
+
+    document_terms_counter = Counter()
+    document_length_counter = Counter()
 
     while num_closed < num_files:
 
@@ -152,11 +172,17 @@ def __merge_spimi_blocks(output_file, block_filepaths):
                 head_entries[i] = None
                 head_terms[i] = None
 
-        __write_index_entry(output_file, smallest_term, merged_postings.items())
+        __flush_index_entry(output_file, smallest_term,
+                            merged_postings.items(),
+                            document_terms_counter, document_length_counter)
 
     for block_file in block_files:
         if not block_file.closed:
             block_file.close()
+
+    __write_document_stats(document_stats_path,
+                           document_terms_counter,
+                           document_length_counter)
 
 
 def create_index_reader(filepath):
@@ -178,6 +204,15 @@ def create_index_reader(filepath):
                 token = __read_token(f, position)
 
     return (number_of_documents, generator)
+
+
+def load_document_stats(filepath):
+    """Loads document level stats which were collected
+    during index creation
+    """
+
+    with open(filepath, 'r') as f:
+        return json.loads(f.read())
 
 
 def __read_token(file, position=None):
@@ -222,6 +257,18 @@ def __write_spimi_block(dictionary):
     return filename
 
 
+def __flush_index_entry(file, term, postings_list,
+                        document_terms_counter, document_length_counter):
+    """Collects document stats and write the given index entry to disk
+    """
+
+    for document_id, term_frequency in postings_list:
+        document_terms_counter[document_id] += 1
+        document_length_counter[document_id] += term_frequency
+
+    __write_index_entry(file, term, postings_list)
+
+
 def __write_index_entry(file, term, postings_list):
     """Writes s single index entry into the given file
 
@@ -241,6 +288,19 @@ def __write_index_entry(file, term, postings_list):
         term, str(len(postings_list)), ','.join(postings))
 
     file.write(line)
+
+
+def __write_document_stats(filepath, document_terms_counter,
+                           document_length_counter):
+    """Writes various document level stats to disk
+    """
+    stats = {
+        'terms': document_terms_counter,
+        'length': document_length_counter
+    }
+
+    with open(filepath, 'w') as f:
+        f.write(json.dumps(stats))
 
 
 def __to_bag_of_words(words):

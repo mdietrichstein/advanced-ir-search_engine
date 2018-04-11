@@ -4,7 +4,6 @@ import gc
 from tqdm import tqdm
 from collections import namedtuple
 
-from indexing import create_index_reader
 from preprocessing import split_words, create_preprocessor
 from searching import simple_tfidf_search, simple_bm25_search, simple_bm25va_search
 
@@ -15,17 +14,8 @@ START_TAG_PATTERN = re.compile(r'^<(.*?)>.*')
 Topic = namedtuple('Topic', ['id', 'title', 'narr', 'desc'])
 
 
-def generate_qrel(index_filepath, topics_filepath, output_filepath,
-                  ranking_method, run_name):
-    print('Loading topics from', topics_filepath)
-    topics = load_topic_tokens(topics_filepath)
-    print('Searching', len(topics), 'topics')
-
-    print('Loading search index')
-    number_of_documents, index_reader_generator = create_index_reader(index_filepath)
-    index_reader = index_reader_generator()
-    index = list(index_reader)
-    print('done')
+def generate_qrel(number_of_documents, index, document_stats, topics,
+                  output_filepath, ranking_method, run_name):
 
     print('Generating ranking using', ranking_method)
     topic_scores = []
@@ -36,11 +26,15 @@ def generate_qrel(index_filepath, topics_filepath, output_filepath,
         document_scores = None
 
         if ranking_method == 'tfidf':
-            document_scores = simple_tfidf_search(number_of_documents, index, search_terms)
+            document_scores = simple_tfidf_search(number_of_documents, index,
+                                                  search_terms)
         elif ranking_method == 'bm25':
-            document_scores = simple_bm25_search(number_of_documents, index, search_terms)
+            document_scores = simple_bm25_search(number_of_documents, index,
+                                                 search_terms, document_stats)
         elif ranking_method == 'bm25va':
-            document_scores = simple_bm25va_search(number_of_documents, index, search_terms)
+            document_scores = simple_bm25va_search(number_of_documents, index,
+                                                   search_terms,
+                                                   document_stats)
 
         for document_score in document_scores[:60]:
             topic_scores.append((topic.id, document_score[1], document_score[0]))
@@ -54,7 +48,8 @@ def generate_qrel(index_filepath, topics_filepath, output_filepath,
         for rank, topic_score in enumerate(topic_scores):
             (topic_id, score, document_id) = topic_score
 
-            f.write('{} Q0 {} {} {:6f} {}\n'.format(topic_id, document_id, rank+1, score, run_name))
+            f.write('{} Q0 {} {} {:6f} {}\n'.format(topic_id, document_id,
+                                                    rank+1, score, run_name))
 
 
 def load_topic_tokens(file_path, encoding='latin-1',

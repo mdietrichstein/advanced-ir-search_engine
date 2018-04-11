@@ -25,8 +25,11 @@ if __name__ == "__main__":
 
     # print('Writing index using simple method to "simple.index"')
     # print('Reading source files')
-    # create_index_simple(document_files, preprocessor, 'simple.index')
+    # create_index_simple(document_files, preprocessor,
+    #                     'simple.index', 'simple.stats')
     # print()
     print('Writing index using SPIMI to "spimi.index"')
     print('Reading source files')
-    create_index_spimi(document_files, preprocessor, 'spimi.index', max_tokens_per_block=10000000)
+    create_index_spimi(document_files, preprocessor,
+                       'spimi.index', 'spimi.stats',
+                       max_tokens_per_block=10000000)

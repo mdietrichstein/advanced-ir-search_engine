@@ -16,9 +16,10 @@ Add a bunch of docs to `document_files` in `cmd_index.py`, e.g. `document_files 
 
 ### Output
 
-The script creates a single output file:
+The script creates the following output files:
 
 * `spimi.index`: Index created by using the SPIMI method
+* `spimi.stats`: Document stats collected during spimi index creation
 
 ### Index Format
 
