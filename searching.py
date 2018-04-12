@@ -110,13 +110,10 @@ def simple_bm25_search(number_of_documents, index, search_terms,
 
             length_ratio = (document_length / average_document_length)
             Bd = ((1 - b) + (b * length_ratio))
-            K = k1 * Bd
 
-            bm25 = ((k3+1)*tfq)/(k3+1)
-            bm25 *= (((k1+1)*tfd)/(K+tfd))
-            bm25 *= math.log((number_of_documents-dft+0.5)/(dft+0.5))
-
-            score += bm25
+            score += __bm25_score(number_of_documents,
+                                  tfq, tfd, dft,
+                                  Bd, k1, k3)
 
         document_scores.append([document.id, score])
 
@@ -164,13 +161,9 @@ def simple_bm25va_search(number_of_documents, index, search_terms,
             Bva *= (document_length / len(document.terms))
             Bva += (1 - (1 / mean_average_term_frequency)) * length_ratio
 
-            K = k1 * Bva
-
-            bm25va = ((k3+1)*tfq)/(k3+1)
-            bm25va *= (((k1+1)*tfd)/(K+tfd))
-            bm25va *= math.log((number_of_documents-dft+0.5)/(dft+0.5))
-
-            score += bm25va
+            score += __bm25_score(number_of_documents,
+                                  tfq, tfd, dft,
+                                  Bva, k1, k3)
 
         document_scores.append([document.id, score])
 
@@ -200,6 +193,16 @@ def __calculate_average_document_length(documents, document_length_counter):
 def __tfidf_score(number_of_documents, document_frequency, term_frequency):
     idf = math.log(number_of_documents / document_frequency)
     return term_frequency * idf
+
+
+def __bm25_score(number_of_documents, tfq, tfd, dft, Bd, k1, k3):
+    K = k1 * Bd
+
+    bm25 = ((k3+1)*tfq)/(k3+tfq)
+    bm25 *= (((k1+1)*tfd)/(K+tfd))
+    bm25 *= math.log((number_of_documents-dft+0.5)/(dft+0.5))
+
+    return bm25
 
 
 def __find_documents_for_terms(index, search_terms):
