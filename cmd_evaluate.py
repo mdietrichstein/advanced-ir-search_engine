@@ -42,11 +42,11 @@ gc.collect()
 ranking_method = 'bm25'
 generate_qrel(number_of_documents, index, document_stats, topics,
               f'{ranking_method}_results.txt',
-              ranking_method, 'dev-run')
+              ranking_method, 'dev-run', { 'k1': 1.2, 'b': 0.75, 'k3': 8.0})
 gc.collect()
 
 ranking_method = 'bm25va'
 generate_qrel(number_of_documents, index, document_stats, topics,
               f'{ranking_method}_results.txt',
-              ranking_method, 'dev-run')
+              ranking_method, 'dev-run', { 'k1': 1.2, 'k3': 8.0})
 gc.collect()
