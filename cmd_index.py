@@ -76,9 +76,6 @@ def simple(ctx):
     click.echo(f'Writing index using simple method to {ctx.obj["INDEX_FILE"]} and document stats to {ctx.obj["STATS_FILE"]}')
     click.echo('Reading source files')
 
-    ctx.obj['STRIP_HTML_TAGS'] = strip_html_tags
-    ctx.obj['STRIP_HTML_TAGS'] = strip_html_entities
-    ctx.obj['STRIP_HTML_TAGS'] = strip_square_bracket_tags
     create_index_simple(ctx.obj['DOCUMENT_FILES'], preprocessor,
                         ctx.obj['INDEX_FILE'],
                         ctx.obj['STATS_FILE'],
