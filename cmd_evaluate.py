@@ -33,14 +33,14 @@ generate_qrel(number_of_documents, index, document_stats, topics,
               ranking_method, 'dev-run')
 gc.collect()
 
-# ranking_method = 'bm25'
-# generate_qrel(number_of_documents, index, document_stats, topics,
-#               f'{ranking_method}_results.txt',
-#               ranking_method, 'dev-run')
-# gc.collect()
+ranking_method = 'bm25'
+generate_qrel(number_of_documents, index, document_stats, topics,
+              f'{ranking_method}_results.txt',
+              ranking_method, 'dev-run')
+gc.collect()
 
-# ranking_method = 'bm25va'
-# generate_qrel(number_of_documents, index, document_stats, topics,
-#               f'{ranking_method}_results.txt',
-#               ranking_method, 'dev-run')
-# gc.collect()
+ranking_method = 'bm25va'
+generate_qrel(number_of_documents, index, document_stats, topics,
+              f'{ranking_method}_results.txt',
+              ranking_method, 'dev-run')
+gc.collect()

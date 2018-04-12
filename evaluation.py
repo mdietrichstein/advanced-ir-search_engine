@@ -30,7 +30,7 @@ def generate_qrel(number_of_documents, index, document_stats, topics,
                                                   search_terms)
         elif ranking_method == 'cosine_tfidf':
             document_scores = cosine_tfidf_search(number_of_documents, index,
-                                                  search_terms, document_stats)
+                                                  search_terms)
         elif ranking_method == 'bm25':
             document_scores = simple_bm25_search(number_of_documents, index,
                                                  search_terms, document_stats)
