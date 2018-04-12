@@ -5,7 +5,7 @@ from tqdm import tqdm
 from collections import namedtuple
 
 from preprocessing import split_words, create_preprocessor
-from searching import simple_tfidf_search, simple_bm25_search, simple_bm25va_search
+from searching import simple_tfidf_search, cosine_tfidf_search, simple_bm25_search, simple_bm25va_search
 
 
 TOP_PATTERN = re.compile(r'<top>(.*?)<\/top>', re.DOTALL | re.M)
@@ -28,6 +28,9 @@ def generate_qrel(number_of_documents, index, document_stats, topics,
         if ranking_method == 'tfidf':
             document_scores = simple_tfidf_search(number_of_documents, index,
                                                   search_terms)
+        elif ranking_method == 'cosine_tfidf':
+            document_scores = cosine_tfidf_search(number_of_documents, index,
+                                                  search_terms, document_stats)
         elif ranking_method == 'bm25':
             document_scores = simple_bm25_search(number_of_documents, index,
                                                  search_terms, document_stats)
@@ -41,8 +44,6 @@ def generate_qrel(number_of_documents, index, document_stats, topics,
 
         if i % 5 == 0:
             gc.collect()
-
-    # topic_scores.sort(key=lambda ts: ts[1], reverse=True)
 
     with open(output_filepath, 'w') as f:
         for rank, topic_score in enumerate(topic_scores):

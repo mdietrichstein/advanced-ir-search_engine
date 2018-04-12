@@ -26,6 +26,11 @@ generate_qrel(number_of_documents, index, document_stats, topics,
               f'{ranking_method}_results.txt',
               ranking_method, 'dev-run')
 
+ranking_method = 'cosine_tfidf'
+generate_qrel(number_of_documents, index, document_stats, topics,
+              f'{ranking_method}_results.txt',
+              ranking_method, 'dev-run')
+
 ranking_method = 'bm25'
 generate_qrel(number_of_documents, index, document_stats, topics,
               f'{ranking_method}_results.txt',

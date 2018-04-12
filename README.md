@@ -46,9 +46,10 @@ Each consecutive line represents a term including related data:
 
 ### Output
 
-The script creates three result files, one for each ranking algorithm (tf-idf, bm25, bm25va):
+The script creates four result files, one for each ranking algorithm (tf-idf, cosine tf-idf, bm25, bm25va):
 
 * `tfidf_results.txt`
+* `cosine_tfidf_results.txt`
 * `bm25_results.txt`
 * `bm25va_results.txt`
 

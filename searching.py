@@ -38,6 +38,39 @@ def simple_tfidf_search(number_of_documents, index, search_terms):
     return document_scores
 
 
+def cosine_tfidf_search(number_of_documents, index, search_terms,
+                        document_stats):
+    """Runs a cosine tf-idf search through the index
+    """
+    search_term_counter = Counter(search_terms)
+
+    tokens = __find_tokens_for_terms(index, search_terms)
+
+    document_scores = Counter()
+
+    for token in tokens:
+        tfq = search_term_counter[token.term]
+
+        w_tq = __tfidf_score(number_of_documents, token.document_frequency,
+                             tfq)
+
+        for document_id, tfd in token.postings:
+            w_tf = __tfidf_score(number_of_documents, token.document_frequency,
+                                 tfd)
+            document_scores[document_id] += w_tf * w_tq
+
+    document_length_counter = document_stats['length']
+
+    for document_id in document_scores:
+        normalized_score = document_scores[document_id] / document_length_counter[document_id]
+        document_scores[document_id] = normalized_score
+
+    document_scores = list(document_scores.items())
+    document_scores.sort(key=lambda ds: ds[1], reverse=True)
+
+    return document_scores
+
+
 def simple_bm25_search(number_of_documents, index, search_terms,
                        document_stats, k1=1.2, b=0.75, k3=8):
     """Runs a simple bm25 search through the index
@@ -167,9 +200,8 @@ def __bm25_score(number_of_documents, tfq, tfd, dft, Bd, k1, k3):
     return bm25
 
 
-def __find_documents_for_terms(index, search_terms):
-    """Returns matching documents and token objects for
-    the given terms
+def __find_tokens_for_terms(index, search_terms):
+    """Returns matching token objects for the given terms
     """
     search_tokens = []
     needles = set(search_terms)
@@ -185,6 +217,15 @@ def __find_documents_for_terms(index, search_terms):
 
             if not needles:
                 break
+
+    return search_tokens
+
+
+def __find_documents_for_terms(index, search_terms):
+    """Returns matching documents and token objects for
+    the given terms
+    """
+    search_tokens = __find_tokens_for_terms(index, search_terms)
 
     documents = {}
 
