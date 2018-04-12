@@ -153,8 +153,8 @@ def __tfidf_score(number_of_documents, document_frequency, term_frequency):
     return math.log(1 + term_frequency) * idf
 
 
-def __bm25_score(number_of_documents, tfq, tfd, dft, Bd, k1, k3):
-    K = k1 * Bd
+def __bm25_score(number_of_documents, tfq, tfd, dft, B, k1, k3):
+    K = k1 * B
 
     bm25 = ((k3+1)*tfq)/(k3+tfq)
     bm25 *= (((k1+1)*tfd)/(K+tfd))
