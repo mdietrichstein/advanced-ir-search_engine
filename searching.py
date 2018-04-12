@@ -45,7 +45,7 @@ def cosine_tfidf_search(number_of_documents, index, search_terms,
         for document_id, tfd in token.postings:
             w_tf = __tfidf_score(number_of_documents, token.document_frequency,
                                  tfd)
-            document_scores[document_id] += w_tf * w_tq
+            document_scores[document_id] += w_tq * w_tf
 
     document_length_counter = document_stats['length']
 
