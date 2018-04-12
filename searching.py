@@ -59,7 +59,7 @@ def cosine_tfidf_search(number_of_documents, index, search_terms,
 
 
 def simple_bm25_search(number_of_documents, index, search_terms,
-                       document_stats, k1=1.2, b=0.75, k3=8):
+                       document_stats, k1=1.2, b=0.75, k3=100):
     """Runs a simple bm25 search through the index
     """
     tokens = __find_tokens_for_terms(index, search_terms)
@@ -69,7 +69,7 @@ def simple_bm25_search(number_of_documents, index, search_terms,
     document_length_counter = document_stats['length']
 
     # Optimization: Save average_document_length in index
-    average_document_length = __calculate_average_document_length(document_ids, document_length_counter)
+    average_document_length = __calculate_average_document_length(document_length_counter)
 
     search_term_counter = Counter(search_terms)
 
@@ -93,7 +93,7 @@ def simple_bm25_search(number_of_documents, index, search_terms,
 
 
 def simple_bm25va_search(number_of_documents, index, search_terms,
-                         document_stats, k1=1.2, k3=8):
+                         document_stats, k1=1.2, k3=100):
     """Runs a simple bm25va search through the index
     """
     tokens = __find_tokens_for_terms(index, search_terms)
@@ -104,8 +104,8 @@ def simple_bm25va_search(number_of_documents, index, search_terms,
     document_length_counter = document_stats['length']
 
     # Optimization: Save average_document_length in index
-    average_document_length = __calculate_average_document_length(document_ids, document_length_counter)
-    mean_average_term_frequency = __calculate_mean_average_term_frequency(document_ids, document_length_counter, document_terms_counter)
+    average_document_length = __calculate_average_document_length(document_length_counter)
+    mean_average_term_frequency = __calculate_mean_average_term_frequency(document_length_counter, document_terms_counter)
 
     search_term_counter = Counter(search_terms)
 
@@ -130,7 +130,8 @@ def simple_bm25va_search(number_of_documents, index, search_terms,
     return document_scores
 
 
-def __calculate_mean_average_term_frequency(document_ids, document_length_counter, document_terms_counter):
+def __calculate_mean_average_term_frequency(document_length_counter, document_terms_counter):
+    document_ids = list(document_length_counter.keys())
     return sum([__calculate_average_term_frequency(document_id, document_length_counter, document_terms_counter) for document_id in document_ids]) / len(document_ids)
 
 
@@ -139,13 +140,9 @@ def __calculate_average_term_frequency(document_id, document_length_counter,
     return document_length_counter[document_id] / document_terms_counter[document_id]
 
 
-def __calculate_average_document_length(document_ids, document_length_counter):
-    avg = 0
-
-    for document_id in document_ids:
-        avg += document_length_counter[document_id]
-
-    return avg / len(document_ids)
+def __calculate_average_document_length(document_length_counter):
+    lengths = list(document_length_counter.values())
+    return sum(lengths) / len(lengths)
 
 
 def __tfidf_score(number_of_documents, document_frequency, term_frequency):
