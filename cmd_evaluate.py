@@ -7,8 +7,14 @@ index_filepath = 'spimi.index'
 stats_filepath = 'spimi.stats'
 topics_filepath = './data/TREC8all/topicsTREC8Adhoc.txt'
 
+preprocessor = create_preprocessor(enable_case_folding=True,
+                                   enable_remove_stop_words=True,
+                                   enable_stemmer=True,
+                                   enable_lemmatizer=False,
+                                   min_length=2)
+
 print('Loading topics from', topics_filepath)
-topics = load_topic_tokens(topics_filepath)
+topics = load_topic_tokens(topics_filepath, preprocess=preprocessor)
 print('Searching', len(topics), 'topics')
 
 print('Loading document stats')

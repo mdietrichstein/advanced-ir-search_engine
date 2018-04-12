@@ -96,6 +96,7 @@ def create_index_spimi(document_files, preprocess, output_filepath,
 
     if verbose:
         print('Merging {} block(s)'.format(len(block_filenames)))
+        print('This might take a while...')
 
     with open(output_filepath, 'w') as output_file:
         output_file.write('{}\n'.format(num_documents_processed))

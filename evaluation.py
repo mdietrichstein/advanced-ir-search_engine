@@ -15,7 +15,7 @@ Topic = namedtuple('Topic', ['id', 'title', 'narr', 'desc'])
 
 
 def generate_qrel(number_of_documents, index, document_stats, topics,
-                  output_filepath, ranking_method, run_name):
+                  output_filepath, ranking_method, run_name, params={}):
 
     print('Generating ranking using', ranking_method)
     topic_scores = []
@@ -33,11 +33,16 @@ def generate_qrel(number_of_documents, index, document_stats, topics,
                                                   search_terms)
         elif ranking_method == 'bm25':
             document_scores = simple_bm25_search(number_of_documents, index,
-                                                 search_terms, document_stats)
+                                                 search_terms, document_stats,
+                                                 k1=params['k1'],
+                                                 b=params['b'],
+                                                 k3=params['k3'])
         elif ranking_method == 'bm25va':
             document_scores = simple_bm25va_search(number_of_documents, index,
                                                    search_terms,
-                                                   document_stats)
+                                                   document_stats,
+                                                   k1=params['k1'],
+                                                   k3=params['k3'])
 
         for document_score in document_scores[:60]:
             topic_scores.append((topic.id, document_score[1], document_score[0]))
@@ -58,7 +63,7 @@ def load_topic_tokens(file_path, encoding='latin-1',
                       strip_html_entities=True,
                       strip_square_bracket_tags=True,
                       preprocess=create_preprocessor()):
-    """Generator which provides a list of topics alogn with the
+    """Generator which provides a list of topics along with the
     preprocessed and tokenized fields
     """
     result = []
