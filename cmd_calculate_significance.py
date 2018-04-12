@@ -1,5 +1,16 @@
 from scipy.stats import ttest_ind
 
+tfidf = [
+    0.0000, 0.0003, 0.1408, 0.0072, 0.0091, 0.0258,
+    0.0302, 0.0116, 0.0018, 0.0032, 0.0138, 0.0000,
+    0.0289, 0.0058, 0.0976, 0.0960, 0.0102, 0.0184,
+    0.0463, 0.1004, 0.0025, 0.0333, 0.6140, 0.0110,
+    0.0182, 0.0000, 0.0511, 0.0053, 0.1288, 0.5000,
+    0.1131, 0.0036, 0.0000, 0.0573, 0.0081, 0.0001,
+    0.0142, 0.0327, 0.0002, 0.0000, 0.1245, 0.0000,
+    0.0158, 0.0947, 0.0000, 0.0026, 0.1063, 0.0000,
+    0.0371, 0.0150]
+
 
 cosine_tfidf = [
     0.0000, 0.0246, 0.3019, 0.0255, 0.0327, 0.1906,
@@ -34,8 +45,12 @@ bm25va = [
     0.0281, 0.4112, 0.0653, 0.0155, 0.2540, 0.0181,
     0.0691, 0.0945]
 
-equal_var = False
+equal_var = True
 
+print(ttest_ind(tfidf, cosine_tfidf, equal_var=equal_var))
+print(ttest_ind(tfidf, bm25, equal_var=equal_var))
+print(ttest_ind(tfidf, bm25va, equal_var=equal_var))
+print()
 print(ttest_ind(cosine_tfidf, bm25, equal_var=equal_var))
 print(ttest_ind(cosine_tfidf, bm25va, equal_var=equal_var))
 print(ttest_ind(bm25, bm25va, equal_var=equal_var))
