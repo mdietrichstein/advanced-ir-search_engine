@@ -21,10 +21,10 @@ index_reader = index_reader_generator()
 index = list(index_reader)
 print('done')
 
-# ranking_method = 'tfidf'
-# generate_qrel(number_of_documents, index, document_stats, topics,
-#               f'{ranking_method}_results.txt',
-#               ranking_method, 'dev-run')
+ranking_method = 'tfidf'
+generate_qrel(number_of_documents, index, document_stats, topics,
+              f'{ranking_method}_results.txt',
+              ranking_method, 'dev-run')
 
 ranking_method = 'bm25'
 generate_qrel(number_of_documents, index, document_stats, topics,
