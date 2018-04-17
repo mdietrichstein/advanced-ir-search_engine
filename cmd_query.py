@@ -1,7 +1,7 @@
 from preprocessing import split_words, create_preprocessor
 from indexing import create_index_reader, load_document_stats
 from searching import simple_tfidf_search, cosine_tfidf_search, simple_bm25_search, simple_bm25va_search
-
+import time
 import click
 
 
@@ -67,10 +67,11 @@ def cli(ctx, query, index_file, stats_file,
 
             click.echo(f'Loading search index from {index_file}')
             click.echo('This might take a while')
+            start = time.time()
             number_of_documents, index_reader_generator = create_index_reader(index_file)
             index_reader = index_reader_generator()
             index = list(index_reader)
-            click.echo('done')
+            click.echo(f'done in {time.time() - start} seconds')
 
             document_scores = None
 

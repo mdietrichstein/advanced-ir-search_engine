@@ -2,6 +2,7 @@ from preprocessing import create_preprocessor, split_words
 from evaluation import generate_qrel, load_topic_tokens
 from indexing import create_index_reader, load_document_stats
 import gc
+import time
 
 index_filepath = 'spimi.index'
 stats_filepath = 'spimi.stats'
@@ -22,10 +23,11 @@ document_stats = load_document_stats(stats_filepath)
 print('done')
 
 print('Loading search index')
+start = time.time()
 number_of_documents, index_reader_generator = create_index_reader(index_filepath)
 index_reader = index_reader_generator()
 index = list(index_reader)
-print('done')
+print('done in', time.time() - start, 'seconds')
 
 ranking_method = 'tfidf'
 generate_qrel(number_of_documents, index, document_stats, topics,

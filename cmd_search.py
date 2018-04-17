@@ -1,7 +1,7 @@
 from preprocessing import create_preprocessor
 from indexing import create_index_reader, load_document_stats
 from evaluation import generate_qrel, load_topic_tokens
-
+import time
 import click
 
 
@@ -71,10 +71,11 @@ def cli(ctx, output_file, run_name,
 
             click.echo(f'Loading search index from {index_file}')
             click.echo('This might take a while')
+            start = time.time()
             number_of_documents, index_reader_generator = create_index_reader(index_file)
             index_reader = index_reader_generator()
             index = list(index_reader)
-            click.echo('done')
+            click.echo(f'done in {time.time() - start} seconds')
 
             generate_qrel(number_of_documents,
                           index,
