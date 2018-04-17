@@ -13,7 +13,7 @@ __pycache__/
 *$py.class
 *_results.txt
 *.stats
-
+*.pdf
 # C extensions
 *.so
 
