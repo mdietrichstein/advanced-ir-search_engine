@@ -1,7 +1,3 @@
-0327606 - Marc Dietrichstein
-
-------
-
 # Advanced Information Retrieval - Search Engine (Exercise 1)
 
 ## Prerequisites
