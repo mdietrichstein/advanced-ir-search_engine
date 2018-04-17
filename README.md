@@ -1,5 +1,7 @@
 ## Prerequisites
 
+This project requires at least python 3.6.
+
 ### Install Dependencies
 
 `pip install -r requirements.txt`
