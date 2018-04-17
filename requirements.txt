@@ -3,3 +3,4 @@ tqdm==4.19.8
 nltk==3.2.5
 click==6.7
 scipy==1.0.1
+pathos==0.2.1

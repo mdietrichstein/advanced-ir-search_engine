@@ -1,5 +1,6 @@
 import re
 import Stemmer
+from functools import partial
 from nltk.stem import WordNetLemmatizer
 
 STEMMER = Stemmer.Stemmer('english')
@@ -61,16 +62,21 @@ def create_preprocessor(enable_case_folding=True,
     if min_length:
         steps.append(lambda words: __remove_short_words(words, min_length))
 
-    def fn_preprocess(words):
-        words = list(words)
+    #def fn_preprocess(words):
+    #    for step in steps:
+    #        words = step(words)
+    #    return words
 
-        for i, step in enumerate(steps):
-            words = list(step(words))
+    return partial(fn_preprocess, steps=steps)
 
-        return words
 
-    return fn_preprocess
+def fn_preprocess(words,steps):
+    words = list(words)
 
+    for i, step in enumerate(steps):
+        words = list(step(words))
+
+    return words
 
 def __case_folding(words):
     return map(lambda word: word.casefold(), words)

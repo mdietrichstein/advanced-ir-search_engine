@@ -1,8 +1,9 @@
 import re
 import codecs
+import os
 from tqdm import tqdm
 from xml.dom import minidom
-
+from pathos.profile import process_id
 from preprocessing import split_words, create_preprocessor
 
 DOC_PATTERN = re.compile(r'<DOC>(.*?)<\/DOC>', re.DOTALL | re.M)
@@ -43,6 +44,66 @@ def generate_tokens_for_files(filepaths, encoding='latin-1',
 
             for term in terms:
                 yield (doc_id, term, num_documents_processed)
+
+
+def generate_tokens_for_files_distributed(filepaths, encoding='latin-1',
+                              use_regex_parser=True,
+                              strip_html_tags=True,
+                              strip_html_entities=True,
+                              strip_square_bracket_tags=True,
+                              preprocess=create_preprocessor()):
+    """Generator which provides a list of (doc_id, term) pairs for documents
+    contained in the given files
+    """
+
+    num_documents_processed = 0
+    segment_path = "./segmented_files/"
+    partitions = ["aa", "bc", "de", "fh", "ij", "km", "nq", "rs", "tu", "vz"]
+    segments = []
+
+    for _ in partitions:
+        segments.append([])
+
+    for filepath in tqdm(filepaths, total=len(filepaths)):
+        documents = None
+
+        if use_regex_parser:
+            documents = __regex_parse_documents_from_file(filepath)
+        else:
+            documents = __xml_parse_documents_from_file(filepath)
+
+        for document in documents:
+            (doc_id, content) = document
+            num_documents_processed += 1
+            words = split_words(content,
+                                strip_html_tags=strip_html_tags,
+                                strip_html_entities=strip_html_entities,
+                                strip_square_bracket_tags=strip_square_bracket_tags)
+
+            terms = preprocess(words)
+
+            for term in terms:
+                c = term[0]
+                for index, partition in enumerate(partitions):
+                    if index == segments.__len__() - 1:
+                        segments[index].append(term + " " + doc_id)
+                        break
+                    else:
+                        if c <= partition[1]:
+                            segments[index].append(term + " " + doc_id)
+                            break
+
+    with open(segment_path + "meta" + process_id().__str__(), "a") as file:
+        file.write("{}\n".format(num_documents_processed))
+
+    for index, segment in enumerate(segments):
+        #write tokenized documents to file
+        file = open(segment_path + partitions[index] + process_id().__str__(), "a")
+        for t in segment:
+            file.write(t.__str__())
+            file.write("\n")
+        file.flush()
+        file.close()
 
 
 def __regex_parse_documents_from_file(file_path, encoding='latin-1'):

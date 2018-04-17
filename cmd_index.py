@@ -1,5 +1,5 @@
 from preprocessing import create_preprocessor
-from indexing import create_index_simple, create_index_spimi
+from indexing import create_index_simple, create_index_spimi, create_index_map_reduce
 
 import os
 import glob
@@ -100,6 +100,27 @@ def spimi(ctx, max_tokens_per_block):
                        strip_html_tags=ctx.obj['STRIP_HTML_TAGS'],
                        strip_html_entities=ctx.obj['STRIP_HTML_ENTITIES'],
                        strip_square_bracket_tags=ctx.obj['STRIP_SQUARE_BRACKET_TAGS'])
+
+
+@cli.command()
+@click.option('--blocksize', default=16, show_default=True,
+              help='Size of data the Map Process takes one at a time in Megabyte')
+@click.option('--num_nodes', default=None, show_default=True,
+              help='Number of Processes over which the work load is distributed. Typically defaults to the number of cores')
+@click.pass_context
+def map_reduce(ctx, blocksize, num_nodes):
+    preprocessor = ctx.obj['PREPROCESSOR']
+    click.echo(f'Writing index using map_redduce to {ctx.obj["INDEX_FILE"]} and document stats to {ctx.obj["STATS_FILE"]}')
+    click.echo('Reading source files')
+
+    create_index_map_reduce(ctx.obj['DOCUMENT_FILES'], preprocessor,
+                        ctx.obj['INDEX_FILE'],
+                        ctx.obj['STATS_FILE'],
+                        strip_html_tags=ctx.obj['STRIP_HTML_TAGS'],
+                        strip_html_entities=ctx.obj['STRIP_HTML_ENTITIES'],
+                        strip_square_bracket_tags=ctx.obj['STRIP_SQUARE_BRACKET_TAGS'],
+                        blocksize=blocksize,
+                        num_nodes=num_nodes)
 
 
 if __name__ == '__main__':

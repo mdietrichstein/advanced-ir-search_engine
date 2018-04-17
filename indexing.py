@@ -1,9 +1,12 @@
 import json
 import tempfile
 import gc
+import os
+import glob
+import shutil
 from collections import defaultdict, namedtuple, Counter
-
-from tokenization import generate_tokens_for_files
+from pathos.multiprocessing import ProcessingPool
+from tokenization import generate_tokens_for_files, generate_tokens_for_files_distributed
 
 
 Token = namedtuple('Token', ['position', 'term', 'document_frequency', 'postings'])
@@ -101,6 +104,177 @@ def create_index_spimi(document_files, preprocess, output_filepath,
     with open(output_filepath, 'w') as output_file:
         output_file.write('{}\n'.format(num_documents_processed))
         __merge_spimi_blocks(output_file, document_stats_path, block_filenames)
+
+
+def create_index_map_reduce(document_files, preprocess, output_filepath,
+                        document_stats_path,
+                        verbose=True,
+                        strip_html_tags=True,
+                        strip_html_entities=True,
+                        strip_square_bracket_tags=True,
+                        blocksize=16,
+                        num_nodes=None):
+
+    def __setup():
+        if os.path.isdir(segment_path):
+            for x in glob.glob(segment_path+"*"):
+                os.remove(x)
+        else:
+            os.mkdir(segment_path)
+
+        if os.path.isdir(posting_path):
+            for x in glob.glob(posting_path+"*"):
+                os.remove(x)
+        else:
+            os.mkdir(posting_path)
+
+    def __down():
+        for x in glob.glob(segment_path+"*"):
+            os.remove(x)
+        for x in glob.glob(posting_path+"*"):
+            os.remove(x)
+        os.rmdir(segment_path)
+        os.rmdir(posting_path)
+        pass
+
+    posting_path = "./postings/"
+    segment_path = "./segmented_files/"
+
+    splitsize = 1048576 * blocksize
+    splits = []
+    split = []
+    current_size = 0
+
+    partitions = ["aa", "bc", "de", "fh", "ij", "km", "nq", "rs", "tu", "vz"]
+
+    if verbose:
+        print("Setting up directories...")
+
+    __setup()
+
+    if verbose:
+        print("Splitting up tasks...")
+
+    for f in document_files:
+        if os.path.isfile(f):
+            current_size += os.path.getsize(f)
+            if current_size <= splitsize:
+                split.append(f)
+            else:
+                splits.append(list(split))
+                current_size = os.path.getsize(f)
+                split.clear()
+                split.append(f)
+
+    pool = ProcessingPool(nodes=num_nodes)
+    mul = splits.__len__()
+
+    if verbose:
+        print("Starting Map Phase...".format(num_nodes))
+
+    pool.map(__map, splits, [strip_html_tags]*mul,
+             [strip_html_entities]*mul,
+             [strip_square_bracket_tags]*mul,
+             [preprocess]*mul)
+
+    if verbose:
+        print("Map Phase finished")
+        print("Starting Reducing/Inverting into {} partitions".format(partitions.__len__()))
+
+    pool.map(__reduce, partitions)
+
+    if verbose:
+        print("Merge Partitions and remove temporary directories")
+
+    with open(output_filepath, 'w') as output_file:
+        files = sorted(glob.glob(posting_path+"res"+'*'))
+        files_meta = glob.glob(posting_path+"meta"+"*")
+        num_documents = 0
+
+        for file in files_meta:
+            with open(file, "r") as f:
+                print(num_documents)
+                for line in f:
+                    num_documents += int(line.split("\n")[0])
+
+        output_file.write("{}\n".format(num_documents))
+
+        for file in files:
+            with open(file, 'r') as f:
+                shutil.copyfileobj(f, output_file)
+
+    files = sorted(glob.glob(posting_path+"doc*"))
+
+    document_length_counter = Counter()
+    document_terms_counter = Counter()
+
+    for file in files:
+        document_stats = load_document_stats(file)
+        document_terms = document_stats['terms']
+        document_length = document_stats['length']
+        for c in document_terms:
+            document_terms_counter[c] += document_terms[c]
+            document_length_counter[c] += document_length[c]
+
+    __write_document_stats(document_stats_path, document_terms_counter, document_length_counter)
+
+    __down()
+
+
+def __map(split, strip_html_tags,strip_html_entities,strip_square_bracket_tags, preprocess):
+    generate_tokens_for_files_distributed(split,
+                                          strip_html_tags=strip_html_tags,
+                                          strip_html_entities=strip_html_entities,
+                                          strip_square_bracket_tags=strip_square_bracket_tags,
+                                          preprocess=preprocess)
+
+
+def __reduce(partition):
+    segment_path = "./segmented_files/"
+    posting_path = "./postings/"
+
+    files = glob.glob(segment_path+partition+"*")
+
+    print("Merge Segmented files of {} partition".format(partition))
+
+    with open(posting_path + partition + "tmp", 'w') as output_file:
+        for file in files:
+            with open(file, 'r') as f:
+                f.readline()
+                shutil.copyfileobj(f, output_file)
+
+    print("Sort Merge of {} partition".format(partition))
+
+    with open(posting_path + partition, "w") as output_file:
+        f = open(posting_path + partition + "tmp", "r")
+        fs = sorted(f)
+        output_file.writelines(fs)
+        f.close()
+
+    print("reducing {} partition started".format(partition))
+
+    with open(posting_path + partition, "r") as file:
+        output_file = open(posting_path+"res"+partition, "w")
+        old_key, old_value = file.readline().strip("\n").split(" ")
+        posts = [old_value]
+        document_terms_counter = Counter()
+        document_length_counter = Counter()
+        for line in file:
+            key, value = line.strip("\n").split(" ")
+            if old_key != key:
+                __flush_index_entry(output_file, old_key, __to_bag_of_words(posts),
+                                    document_terms_counter, document_length_counter)
+                old_key = key
+                posts = []
+            posts.append(value)
+        output_file.flush()
+        output_file.close()
+
+    __write_document_stats(posting_path + "doc" + partition, document_terms_counter, document_length_counter)
+
+    gc.collect()
+
+    print("reducing {} partition finished".format(partition))
 
 
 def __spimi_invert(token_stream, max_tokens_per_block):
