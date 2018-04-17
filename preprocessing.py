@@ -32,7 +32,7 @@ def split_words(text,
     if strip_square_bracket_tags:
         text = re.sub(SQUARE_BRACKET_TAG_PATTERN, '', text)
 
-    return filter(lambda word: word != '', SPLIT_WORDS_PATTERN.split(text))
+    return list(filter(lambda word: word != '', SPLIT_WORDS_PATTERN.split(text)))
 
 
 def create_preprocessor(enable_case_folding=True,
@@ -62,8 +62,10 @@ def create_preprocessor(enable_case_folding=True,
         steps.append(lambda words: __remove_short_words(words, min_length))
 
     def fn_preprocess(words):
-        for step in steps:
-            words = step(words)
+        words = list(words)
+
+        for i, step in enumerate(steps):
+            words = list(step(words))
 
         return words
 
