@@ -54,3 +54,5 @@ print()
 print(ttest_ind(cosine_tfidf, bm25, equal_var=equal_var))
 print(ttest_ind(cosine_tfidf, bm25va, equal_var=equal_var))
 print(ttest_ind(bm25, bm25va, equal_var=equal_var))
+
+print(ttest_ind(bm25, bm25, equal_var=equal_var))
