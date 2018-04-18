@@ -73,8 +73,8 @@ def generate_tokens_for_files_distributed(filepaths, encoding='latin-1',
             documents = __xml_parse_documents_from_file(filepath)
 
         for document in documents:
-            (doc_id, content) = document
             num_documents_processed += 1
+            (doc_id, content) = document
             words = split_words(content,
                                 strip_html_tags=strip_html_tags,
                                 strip_html_entities=strip_html_entities,
@@ -93,12 +93,12 @@ def generate_tokens_for_files_distributed(filepaths, encoding='latin-1',
                             segments[index].append(term + " " + doc_id)
                             break
 
-    with open(segment_path + "meta" + process_id().__str__(), "a") as file:
+    with open(segment_path + "meta_" + process_id().__str__(), "a") as file:
         file.write("{}\n".format(num_documents_processed))
 
     for index, segment in enumerate(segments):
         #write tokenized documents to file
-        file = open(segment_path + partitions[index] + process_id().__str__(), "a")
+        file = open(segment_path + partitions[index] + "_" + process_id().__str__(), "a")
         for t in segment:
             file.write(t.__str__())
             file.write("\n")

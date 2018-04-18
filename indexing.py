@@ -166,6 +166,8 @@ def create_index_map_reduce(document_files, preprocess, output_filepath,
                 split.clear()
                 split.append(f)
 
+    splits.append(split)
+
     pool = ProcessingPool(nodes=num_nodes)
     mul = splits.__len__()
 
@@ -187,13 +189,12 @@ def create_index_map_reduce(document_files, preprocess, output_filepath,
         print("Merge Partitions and remove temporary directories")
 
     with open(output_filepath, 'w') as output_file:
-        files = sorted(glob.glob(posting_path+"res"+'*'))
-        files_meta = glob.glob(posting_path+"meta"+"*")
+        files = sorted(glob.glob(posting_path +"res_"+'*'))
+        files_meta = glob.glob(segment_path +"meta_"+"*")
         num_documents = 0
 
         for file in files_meta:
             with open(file, "r") as f:
-                print(num_documents)
                 for line in f:
                     num_documents += int(line.split("\n")[0])
 
@@ -203,7 +204,7 @@ def create_index_map_reduce(document_files, preprocess, output_filepath,
             with open(file, 'r') as f:
                 shutil.copyfileobj(f, output_file)
 
-    files = sorted(glob.glob(posting_path+"doc*"))
+    files = sorted(glob.glob(posting_path+"doc_*"))
 
     document_length_counter = Counter()
     document_terms_counter = Counter()
@@ -233,28 +234,43 @@ def __reduce(partition):
     segment_path = "./segmented_files/"
     posting_path = "./postings/"
 
-    files = glob.glob(segment_path+partition+"*")
+    files = glob.glob(segment_path+partition+"_*")
 
-    print("Merge Segmented files of {} partition".format(partition))
+    print("Sort Segmented files of {} partition".format(partition))
 
-    with open(posting_path + partition + "tmp", 'w') as output_file:
-        for file in files:
-            with open(file, 'r') as f:
-                f.readline()
-                shutil.copyfileobj(f, output_file)
-
-    print("Sort Merge of {} partition".format(partition))
-
-    with open(posting_path + partition, "w") as output_file:
-        f = open(posting_path + partition + "tmp", "r")
+    for file in files:
+        f = open(file, "r")
         fs = sorted(f)
-        output_file.writelines(fs)
         f.close()
+        f = open(file, "w")
+        f.writelines(fs)
+        f.close()
+
+    print("Merge of {} partition".format(partition))
+
+    import contextlib
+    import heapq
+    with contextlib.ExitStack() as stack:
+        files_heap = [stack.enter_context(open(fn)) for fn in files]
+        with open(posting_path+partition,"w") as output_file:
+            output_file.writelines(heapq.merge(*files_heap))
+
+#    with open(posting_path + partition + "_tmp", 'w') as output_file:
+    #    for file in files:
+    #        with open(file, 'r') as f:
+    #            shutil.copyfileobj(f, output_file)
+
+
+#    with open(posting_path + partition, "w") as output_file:
+#        f = open(posting_path + partition + "_tmp", "r")
+#        fs = sorted(f)
+#        output_file.writelines(fs)
+#        f.close()
 
     print("reducing {} partition started".format(partition))
 
     with open(posting_path + partition, "r") as file:
-        output_file = open(posting_path+"res"+partition, "w")
+        output_file = open(posting_path +"res_"+partition, "w")
         old_key, old_value = file.readline().strip("\n").split(" ")
         posts = [old_value]
         document_terms_counter = Counter()
@@ -270,9 +286,7 @@ def __reduce(partition):
         output_file.flush()
         output_file.close()
 
-    __write_document_stats(posting_path + "doc" + partition, document_terms_counter, document_length_counter)
-
-    gc.collect()
+    __write_document_stats(posting_path + "doc_" + partition, document_terms_counter, document_length_counter)
 
     print("reducing {} partition finished".format(partition))
 
