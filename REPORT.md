@@ -63,11 +63,18 @@ Options:
 Commands:
   simple
   spimi
+  map_reduce
 ```
 
 The `spimi` subcommand supports the following additional command-line options:
 ```bash
   --max_tokens_per_block INTEGER  Maximum number of tokens allowed in a single spimi block  [default: 10000000]
+```
+
+The `map_reduce` subcommand supports the following additional command-line options:
+```bash
+  --blocksize INTEGER  Size (in Megabyte) of documents a process should take one at a time (during Map Phase)
+  --num_nodes INTEGER  Number of Nodes/Processes over which the taskload will be distributed. Will typically default to the number of available cores
 ```
 
 ### Trec Evaluation Metrics Creation
@@ -251,7 +258,7 @@ The parameters for BM25 and BM25VA have been left as is (default values).
 The table below shows the p-values obtained by running a t-test comparing the per-topic scores of the respective ranking methods. Significant p-values (lower than 0.05) have been highlighted.
 
 |                | TF-IDF Overlap | TF-IDF VSM | BM25 | BM25VA |
-| -------------- | :------------: | :--------: | :--: | :----: |
+| -------------- | :------------: | :--------: | :---: | :----: |
 | **TF-IDF Overlap** | 1.00000 | 0.07657 | **0.00080** | **0.00098** |
 | **TF-IDF VSM**     | 0.07657 | 1.00000 | 0.15642 | 0.21357 |
 | **BM25**           | **0.00080** | 0.15642 | 1.00000 | 0.81196 |
