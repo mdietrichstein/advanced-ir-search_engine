@@ -44,7 +44,7 @@ def generate_qrel(number_of_documents, index, document_stats, topics,
                                                    k1=params['k1'],
                                                    k3=params['k3'])
 
-        for document_score in document_scores[:60]:
+        for document_score in document_scores:
             topic_scores.append((topic.id, document_score[1], document_score[0]))
 
         if i % 5 == 0:
