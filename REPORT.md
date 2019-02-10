@@ -1,4 +1,4 @@
-# Advanced Information Retrieval - Search Engine (Exercise 1)
+# Advanced Information Retrieval - Search Engine
 
 ## Prerequisites
 
