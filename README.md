@@ -2,7 +2,9 @@
 
 A document search engine written from scratch in Python. Based on concepts from Stanford's [Introduction to Information Retrieval Book](https://nlp.stanford.edu/IR-book/).
 
-Uses the TREC8Adhoc part of the [TIPSTER collection](https://catalog.ldc.upenn.edu/LDC93T3A) for index building and evaluation. You'll have to obtain `TREC8Adhoc.tar.bz2` from this collection to reproduce the results reported in [the report](https://github.com/mdietrichstein/advanced-ir-search_engine/blob/master/REPORT.md).
+Uses the TREC8Adhoc part of the [TIPSTER collection](https://catalog.ldc.upenn.edu/LDC93T3A) for index building and evaluation. You'll have to obtain `TREC8Adhoc.tar.bz2` from this collection ([Disk 4 & 5](https://trec.nist.gov/data/qa/T8_QAdata/disks4_5.html)) to reproduce the [reported results](https://github.com/mdietrichstein/advanced-ir-search_engine/blob/master/REPORT.md).
+
+To evaluate the results with `trec_eval` you will have to download the [TREC-8 ad hoc qrels](https://trec.nist.gov/data/qrels_eng/qrels.trec8.adhoc.parts1-5.tar.gz).
 
 Features:
 * Inverted index construction methods: Simple, Single-pass in-memory indexing (SPIMI )and Map Reduce
