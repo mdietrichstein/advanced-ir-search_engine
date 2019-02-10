@@ -9,6 +9,7 @@ Features:
 * Document similarity metrics: TF-IDF, BM25, [BM25VA (PDF Link)](https://publik.tuwien.ac.at/files/PubDat_244472.pdf) and TF-IDF Cosine Distance
 * Performance evaluation on TREC and result reporting in [qrel format](https://trec.nist.gov/data/qrels_eng/).
 
+An early Rust port is located at [ir-search-engine-rust](https://github.com/mdietrichstein/ir-search-engine-rust).
 ### Prerequisites
 
 This project requires at least python 3.6.
