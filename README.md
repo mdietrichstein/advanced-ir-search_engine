@@ -1,4 +1,12 @@
-## Prerequisites
+### About
+
+A document search engine written from scratch in Python. Based on concepts from Stanford's [Introduction to Information Retrieval Book](https://nlp.stanford.edu/IR-book/).
+
+Features:
+* Inverted index construction methods: Simple, Single-pass in-memory indexing (SPIMI )and Map Reduce
+* Document similarity metrics: TF-IDF, BM25, BM25VS and TF-IDF Cosine Distance
+
+### Prerequisites
 
 This project requires at least python 3.6.
 
