@@ -1,4 +1,4 @@
-### About
+# README
 
 A document search engine written from scratch in Python. Based on concepts from Stanford's [Introduction to Information Retrieval Book](https://nlp.stanford.edu/IR-book/).
 
@@ -6,7 +6,7 @@ Uses the TREC8Adhoc part of the [TIPSTER collection](https://catalog.ldc.upenn.e
 
 Features:
 * Inverted index construction methods: Simple, Single-pass in-memory indexing (SPIMI )and Map Reduce
-* Document similarity metrics: TF-IDF, BM25, BM25VA and TF-IDF Cosine Distance
+* Document similarity metrics: TF-IDF, BM25, [BM25VA (PDF Link)](https://publik.tuwien.ac.at/files/PubDat_244472.pdf) and TF-IDF Cosine Distance
 * Performance evaluation on TREC and result reporting in [qrel format](https://trec.nist.gov/data/qrels_eng/).
 
 ### Prerequisites
