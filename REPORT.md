@@ -1,4 +1,4 @@
-# Advanced Information Retrieval - Search Engine
+# Text Search Engine on TREC
 
 ## Prerequisites
 
